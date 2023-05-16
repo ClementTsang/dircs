@@ -1,6 +1,6 @@
 [package]
-name = "dirh"
-version = "0.1.0"
+name = "dircs"
+version = "0.1.0-rc.1"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
 edition = "2021"
 keywords = ["cli", "hash", "checksum"]
@@ -8,6 +8,12 @@ license = "Apache-2.0"
 categories = ["command-line-utilities"]
 readme = "README.md"
 description = "A small utility to get a hash of either a file or a directory"
+rust-version = "1.69.0"
+
+[[bin]]
+name = "dircs"
+path = "src/main.rs"
+doc = false
 
 [profile.dev.package."*"]
 opt-level = 3 # Compile dependencies with optimizations on even in debug mode.
@@ -23,7 +29,9 @@ codegen-units = 1
 anyhow = "1.0.71"
 blake3 = { version = "1.3.3", features = ["rayon"] }
 clap = { version = "4.2.7", features = ["derive"] }
+jwalk = "0.8.1"
 md5 = "0.7.0"
+memmap2 = "0.6.1"
 rayon = "1.7.0"
 sha1 = "0.10.5"
 sha2 = "0.10.6"

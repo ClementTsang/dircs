@@ -1,46 +1,53 @@
-use std::path::PathBuf;
+mod hash_functions;
 
-use clap::{Parser, ValueEnum};
+mod args;
 
-#[derive(Default, Clone, Copy, Debug, ValueEnum)]
-enum HashFunction {
-    #[default]
-    Blake3,
-    Sha1,
-    Sha2_256,
-    Sha2_512,
-    Sha3_256,
-    Sha3_512,
+use std::fs::File;
+
+use args::*;
+
+use clap::Parser;
+use jwalk::WalkDir;
+use rayon::prelude::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+
+fn get_path_hash(args: &Args) -> anyhow::Result<&[u8]> {
+    let mut walker = WalkDir::new(&args.path)
+        .sort(true)
+        .skip_hidden(args.skip_hidden);
+
+    if let Some(max_threads) = args.max_threads {
+        walker = walker.parallelism(jwalk::Parallelism::RayonNewPool(max_threads));
+    }
+
+    if let Some(depth) = args.depth {
+        walker = walker.max_depth(depth);
+    }
+
+    let hash_list = walker
+        .into_iter()
+        .par_bridge()
+        .into_par_iter()
+        .map(|entry| {
+            if let Ok(entry) = entry {
+                let path = entry.path().canonicalize().unwrap();
+                let file = File::open(path).unwrap();
+
+                if args.memmap {
+                    // TODO: Do this.
+                } else {
+                }
+            }
+        })
+        .reduce(|| (), |acc, op| {});
+
+    Ok(todo!())
 }
 
-#[derive(Parser)]
-struct Args {
-    #[arg(
-        short = 'f',
-        long,
-        help = "The hash function to use.",
-        default_value = "blake3"
-    )]
-    hash: HashFunction,
-
-    #[arg(
-        short,
-        long,
-        help = "The maximum recursion depth to scan. Infinite by default."
-    )]
-    depth: Option<u64>,
-
-    #[arg(
-        short,
-        long,
-        help = "The maximum number of CPU threads to use, if possible. Uses all by default."
-    )]
-    max_threads: u64,
-
-    #[arg(help = "The path to run the program on.")]
-    path: PathBuf,
-}
-
-fn main() {
+fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+    let hash = get_path_hash(&args)?;
+
+    println!("{}", args.path.to_string_lossy());
+
+    Ok(())
 }
