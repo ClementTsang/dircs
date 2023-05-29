@@ -40,7 +40,8 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "Whether to enable memmapping for reading files. Off by default. Note this will not always be used, even if enabled. Also note that if a memmapped file is modified, there may be undefined behaviour!",
+        help = "Whether to enable memmapping for reading files. Off by default. May use a lot of memory.",
+        long_help = "Whether to enable memmapping for reading files. Off by default. Note that this use a lot of memory, especially with multiple threads, and that some files will skip this option, even if enabled. Also note that if a memmapped file is modified, there may be undefined behaviour!",
         default_value = "false"
     )]
     pub memmap: bool,

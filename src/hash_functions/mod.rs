@@ -93,8 +93,8 @@ impl DircsHasher {
         Self { state: hasher }
     }
 
-    pub(crate) fn hash_bytes(mut self, bytes_vec: &[Vec<u8>]) -> Vec<u8> {
-        for bytes in bytes_vec {
+    pub(crate) fn hash_result(mut self, bytes_vec: &[(usize, Vec<u8>)]) -> Vec<u8> {
+        for (_, bytes) in bytes_vec {
             self.state.update(bytes, false);
         }
         self.state.finalize()

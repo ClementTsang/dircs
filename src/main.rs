@@ -7,7 +7,6 @@ mod args;
 use std::{
     fs::File,
     io::{Cursor, Read},
-    sync::Arc,
     time::Instant,
 };
 
@@ -18,7 +17,10 @@ use clap::Parser;
 use hash_functions::DircsHasher;
 use jwalk::WalkDir;
 use memmap::try_memmap;
-use rayon::ThreadPoolBuilder;
+use rayon::{
+    prelude::{ParallelBridge, ParallelIterator},
+    ThreadPoolBuilder,
+};
 
 enum TargetType {
     MMap(Cursor<memmap2::Mmap>),
@@ -48,18 +50,15 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
     }
 
     if let Some(max_threads) = args.max_threads {
+        ThreadPoolBuilder::new()
+            .num_threads(max_threads)
+            .thread_name(|i| format!("dircs-thread-{i}"))
+            .build_global()?;
+
         if max_threads == 1 {
             walker = walker.parallelism(jwalk::Parallelism::Serial);
         } else {
-            walker = walker.parallelism(jwalk::Parallelism::RayonExistingPool {
-                pool: Arc::new(
-                    ThreadPoolBuilder::new()
-                        .num_threads(max_threads)
-                        .thread_name(|i| format!("dircs-thread-{i}"))
-                        .build()?,
-                ),
-                busy_timeout: None,
-            });
+            walker = walker.parallelism(jwalk::Parallelism::RayonNewPool(max_threads));
         }
 
         if args.verbose {
@@ -83,7 +82,9 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
 
     let mut file_hash_results = walker
         .into_iter()
-        .filter_map(|entry| {
+        .enumerate()
+        .par_bridge()
+        .filter_map(|(index, entry)| {
             if let Ok(entry) = entry {
                 let Ok(path) = entry.path().canonicalize() else {
                     if args.verbose {
@@ -118,7 +119,7 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
                             let hex = hex::encode(&result);
                             println!("{path:?} -> {hex} ({bytes_read} bytes read)",);
                         }
-                        Some(result)
+                        Some((index, result))
                     }
                     Err(err) => {
                         if args.verbose {
@@ -140,9 +141,11 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
     if file_hash_results.is_empty() {
         bail!("There were no successful hashes computed!");
     } else if file_hash_results.len() == 1 {
-        Ok(file_hash_results.pop().unwrap())
+        Ok(file_hash_results.pop().unwrap().1)
     } else {
-        Ok(hasher.hash_bytes(&file_hash_results))
+        // Sort by index, compute final results.
+        file_hash_results.sort_by_key(|(index, _)| *index);
+        Ok(hasher.hash_result(&file_hash_results))
     }
 }
 
