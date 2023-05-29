@@ -32,7 +32,7 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "Whether to skip hidden files.",
+        help = "Whether to skip hidden files. Skips by default.",
         default_value = "false"
     )]
     pub skip_hidden: bool,
@@ -40,11 +40,19 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "Whether to enable memmapping for reading files. Note this will not always be used, even if enabled.",
+        help = "Whether to enable memmapping for reading files. Off by default. Note this will not always be used, even if enabled.",
         default_value = "false"
     )]
     pub memmap: bool,
 
     #[arg(help = "The path to run the program on.")]
     pub path: PathBuf,
+
+    #[arg(
+        short,
+        long,
+        help = "Whether to be verbose. Off by default.",
+        default_value = "false"
+    )]
+    pub verbose: bool,
 }
