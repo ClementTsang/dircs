@@ -3,11 +3,12 @@ name = "dircs"
 version = "0.1.0-rc.1"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
 edition = "2021"
+repository = "https://github.com/ClementTsang/dircs"
 keywords = ["cli", "hash", "checksum"]
 license = "Apache-2.0"
 categories = ["command-line-utilities"]
+description = "A utility to get a hash of a file/directory, with a variety of hash functions to choose from."
 readme = "README.md"
-description = "A small utility to get a hash of either a file or a directory"
 rust-version = "1.69.0"
 
 [[bin]]
