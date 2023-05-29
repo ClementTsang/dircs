@@ -1,5 +1,7 @@
 # dircs
 
+[<img src="https://img.shields.io/crates/v/dircs.svg?style=flat-square" alt="crates.io link">](https://crates.io/crates/dircs)
+
 A utility to get a hash of a file/directory, with a variety of hash functions to choose from.
 
 **Note**: This is a program I mostly wrote for personal use, and there might be a lot of rough edges! Feel free to
@@ -7,7 +9,7 @@ submit pull requests or bug reports.
 
 ## Installation
 
-`dircs` is installable using `cargo`:
+`dircs` is on [crates.io](https://crates.io/crates/dircs) and is installable using `cargo`:
 
 ```bash
 cargo install dircs --locked
