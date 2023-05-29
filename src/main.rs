@@ -7,6 +7,7 @@ mod args;
 use std::{
     fs::File,
     io::{Cursor, Read},
+    sync::Arc,
     time::Instant,
 };
 
@@ -17,6 +18,7 @@ use clap::Parser;
 use hash_functions::DircsHasher;
 use jwalk::WalkDir;
 use memmap::try_memmap;
+use rayon::ThreadPoolBuilder;
 
 enum TargetType {
     MMap(Cursor<memmap2::Mmap>),
@@ -37,12 +39,44 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
         .sort(true)
         .skip_hidden(args.skip_hidden);
 
+    if args.verbose {
+        if args.skip_hidden {
+            println!("Skipping hidden files.");
+        } else {
+            println!("Not skipping hidden files.");
+        }
+    }
+
     if let Some(max_threads) = args.max_threads {
-        walker = walker.parallelism(jwalk::Parallelism::RayonNewPool(max_threads));
+        if max_threads == 1 {
+            walker = walker.parallelism(jwalk::Parallelism::Serial);
+        } else {
+            walker = walker.parallelism(jwalk::Parallelism::RayonExistingPool {
+                pool: Arc::new(
+                    ThreadPoolBuilder::new()
+                        .num_threads(max_threads)
+                        .thread_name(|i| format!("dircs-thread-{i}"))
+                        .build()?,
+                ),
+                busy_timeout: None,
+            });
+        }
+
+        if args.verbose {
+            if max_threads == 1 {
+                println!("Using {max_threads} thread for file traversal.");
+            } else {
+                println!("Using {max_threads} threads for file traversal.");
+            }
+        }
     }
 
     if let Some(depth) = args.depth {
         walker = walker.max_depth(depth);
+
+        if args.verbose {
+            println!("Setting a max depth of {depth} for file traversal.");
+        }
     }
 
     let hasher = DircsHasher::new(args.hash);
@@ -51,16 +85,23 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
         .into_iter()
         .filter_map(|entry| {
             if let Ok(entry) = entry {
-                let path = entry.path().canonicalize().unwrap();
+                let Ok(path) = entry.path().canonicalize() else {
+                    if args.verbose {
+                        println!("{} no longer exists, skipping", entry.path().to_string_lossy());
+                    }
+                    return None;
+                };
+
                 if path.is_dir() {
                     return None;
                 }
 
-                if args.verbose {
-                    println!("Processing {path:?}");
-                }
-
-                let file = File::open(&path).unwrap();
+                let Ok(file) = File::open(&path) else {
+                    if args.verbose {
+                        println!("{} cannot be opened, skipping", path.to_string_lossy());
+                    }
+                    return None;
+                };
 
                 let target = if args.memmap {
                     match try_memmap(&file) {
@@ -105,17 +146,29 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
     }
 }
 
+fn verify_args(args: &Args) -> anyhow::Result<()> {
+    if let Some(max_threads) = args.max_threads {
+        if max_threads == 0 {
+            bail!("max_threads must be 1 or greater!");
+        }
+    }
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
     let start = Instant::now();
     let args = Args::parse();
-    let hash = get_path_hash(&args)?;
 
+    verify_args(&args)?;
+
+    let hash = get_path_hash(&args)?;
     let hex = hex::encode(hash);
     let path = args.path.to_string_lossy();
 
     println!("{path} -> {hex}");
     if args.verbose {
-        println!("Took {}s.", start.elapsed().as_secs());
+        println!("Took {:.2}s.", start.elapsed().as_secs_f64());
     }
 
     Ok(())

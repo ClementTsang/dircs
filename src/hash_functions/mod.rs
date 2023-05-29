@@ -97,7 +97,6 @@ impl DircsHasher {
         for bytes in bytes_vec {
             self.state.update(bytes, false);
         }
-
         self.state.finalize()
     }
 
@@ -105,17 +104,19 @@ impl DircsHasher {
         mut self,
         mut target: TargetType,
     ) -> anyhow::Result<(Vec<u8>, usize)> {
-        const BUFFER_SIZE: usize = 64 * 1024; // 64 KiB buffer size.
-        let mut buffer = [0; BUFFER_SIZE];
-
         match (&target, &mut self.state) {
             (TargetType::MMap(cursor), InternalHasher::Blake3(hasher)) => {
+                // If we have memmap and blake3 enabled, we can use this nifty feature!
+
                 let total_bytes = cursor.get_ref().len();
                 hasher.update_rayon(cursor.get_ref());
                 Ok((hasher.finalize().as_bytes().to_vec(), total_bytes))
             }
             _ => {
+                const BUFFER_SIZE: usize = 64 * 1024; // 64 KiB buffer size.
+                let mut buffer = [0; BUFFER_SIZE];
                 let mut total_bytes = 0;
+
                 loop {
                     match target.read(&mut buffer) {
                         Ok(0) => {
