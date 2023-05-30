@@ -171,7 +171,7 @@ fn main() -> anyhow::Result<()> {
 
     println!("{path} -> {hex}");
     if args.verbose {
-        println!("Took {:.2}s.", start.elapsed().as_secs_f64());
+        println!("Took {:.3}s.", start.elapsed().as_secs_f64());
     }
 
     Ok(())

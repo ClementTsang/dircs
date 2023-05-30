@@ -8,23 +8,27 @@ use crate::TargetType;
 pub(crate) enum HashFunction {
     #[default]
     Blake3,
+    MD5,
     Sha1,
     Sha2_256,
+    Sha2_384,
     Sha2_512,
     Sha3_256,
+    Sha3_384,
     Sha3_512,
-    MD5,
 }
 
 #[derive(Clone)]
 enum InternalHasher {
     Blake3(blake3::Hasher),
+    MD5(md5::Context),
     Sha1(sha1::Sha1),
     Sha2_256(sha2::Sha256),
+    Sha2_384(sha2::Sha384),
     Sha2_512(sha2::Sha512),
     Sha3_256(sha3::Sha3_256),
+    Sha3_384(sha3::Sha3_384),
     Sha3_512(sha3::Sha3_512),
-    MD5(md5::Context),
 }
 
 impl InternalHasher {
@@ -38,24 +42,14 @@ impl InternalHasher {
                     h.update(bytes);
                 }
             }
-            InternalHasher::Sha1(h) => {
-                h.update(bytes);
-            }
-            InternalHasher::Sha2_256(h) => {
-                h.update(bytes);
-            }
-            InternalHasher::Sha2_512(h) => {
-                h.update(bytes);
-            }
-            InternalHasher::Sha3_256(h) => {
-                h.update(bytes);
-            }
-            InternalHasher::Sha3_512(h) => {
-                h.update(bytes);
-            }
-            InternalHasher::MD5(ctx) => {
-                ctx.consume(bytes);
-            }
+            InternalHasher::MD5(ctx) => ctx.consume(bytes),
+            InternalHasher::Sha1(h) => h.update(bytes),
+            InternalHasher::Sha2_256(h) => h.update(bytes),
+            InternalHasher::Sha2_384(h) => h.update(bytes),
+            InternalHasher::Sha2_512(h) => h.update(bytes),
+            InternalHasher::Sha3_256(h) => h.update(bytes),
+            InternalHasher::Sha3_384(h) => h.update(bytes),
+            InternalHasher::Sha3_512(h) => h.update(bytes),
         }
     }
 
@@ -63,12 +57,14 @@ impl InternalHasher {
     fn finalize(self) -> Vec<u8> {
         match self {
             InternalHasher::Blake3(h) => h.finalize().as_bytes().to_vec(),
+            InternalHasher::MD5(ctx) => ctx.compute().0.to_vec(),
             InternalHasher::Sha1(h) => h.finalize().to_vec(),
             InternalHasher::Sha2_256(h) => h.finalize().to_vec(),
+            InternalHasher::Sha2_384(h) => h.finalize().to_vec(),
             InternalHasher::Sha2_512(h) => h.finalize().to_vec(),
             InternalHasher::Sha3_256(h) => h.finalize().to_vec(),
+            InternalHasher::Sha3_384(h) => h.finalize().to_vec(),
             InternalHasher::Sha3_512(h) => h.finalize().to_vec(),
-            InternalHasher::MD5(ctx) => ctx.compute().0.to_vec(),
         }
     }
 }
@@ -82,12 +78,14 @@ impl DircsHasher {
     pub(crate) fn new(hash_function: HashFunction) -> Self {
         let hasher = match hash_function {
             HashFunction::Blake3 => InternalHasher::Blake3(blake3::Hasher::new()),
+            HashFunction::MD5 => InternalHasher::MD5(md5::Context::new()),
             HashFunction::Sha1 => InternalHasher::Sha1(sha1::Sha1::new()),
             HashFunction::Sha2_256 => InternalHasher::Sha2_256(sha2::Sha256::new()),
+            HashFunction::Sha2_384 => InternalHasher::Sha2_384(sha2::Sha384::new()),
             HashFunction::Sha2_512 => InternalHasher::Sha2_512(sha2::Sha512::new()),
             HashFunction::Sha3_256 => InternalHasher::Sha3_256(sha3::Sha3_256::new()),
+            HashFunction::Sha3_384 => InternalHasher::Sha3_384(sha3::Sha3_384::new()),
             HashFunction::Sha3_512 => InternalHasher::Sha3_512(sha3::Sha3_512::new()),
-            HashFunction::MD5 => InternalHasher::MD5(md5::Context::new()),
         };
 
         Self { state: hasher }
