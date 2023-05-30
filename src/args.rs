@@ -21,14 +21,15 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "The maximum recursion depth to scan. Will scan as deep as possible by default."
+        help = "The maximum recursion depth for file traversal. Will scan as deep as possible by default."
     )]
     pub depth: Option<usize>,
 
     #[arg(
         short = 't',
         long,
-        help = "The maximum number of CPU threads to use, if possible. Automatically chosen by default."
+        help = "The maximum number of CPU threads to use. Automatically chosen by default.",
+        long_help = "The maximum number of CPU threads to use. Automatically chosen by default. Used for parallelizing file hashing and directory traversal."
     )]
     pub max_threads: Option<usize>,
 
@@ -43,11 +44,11 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "Whether to enable memmapping for reading files. Off by default. May use a lot of memory.",
-        long_help = "Whether to enable memmapping for reading files. Off by default. Note that:
-* This use a lot of memory, especially with multiple threads
-* This does not necessarily result in speedups
-* Some files will skip this option, even if enabled'
+        help = "Whether to enable memmapping for reading files. Disabled by default. May use a lot of memory.",
+        long_help = "Whether to enable memmapping for reading files. Disabled by default. Note that:
+* This uses a lot of memory, especially with multiple threads.
+* This does not necessarily result in speedups.
+* Some files will not be memmapped if the file is too small or too large.
 * If a memmapped file is modified, there may be undefined behaviour!",
         default_value = "false"
     )]
@@ -56,7 +57,7 @@ pub(crate) struct Args {
     #[arg(
         short,
         long,
-        help = "Whether to be verbose. Off by default.",
+        help = "Whether to show verbose logging. Disabled by default.",
         default_value = "false"
     )]
     pub verbose: bool,

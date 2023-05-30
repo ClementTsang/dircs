@@ -1,6 +1,6 @@
 [package]
 name = "dircs"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
 edition = "2021"
 repository = "https://github.com/ClementTsang/dircs"
