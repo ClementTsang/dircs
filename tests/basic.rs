@@ -1,5 +1,7 @@
 use std::{env, process::Command};
 
+use assert_cmd::prelude::OutputAssertExt;
+
 fn dircs() -> Command {
     let exe = env!("CARGO_BIN_EXE_dircs");
     Command::new(exe)
@@ -43,4 +45,9 @@ fn different_file_different_hashes() {
     let b = get_hash("./tests/test_dir/b.txt");
 
     assert_ne!(a, b);
+}
+
+#[test]
+fn empty_dir() {
+    dircs().arg("./tests/test_dir/empty_dir").assert().failure();
 }

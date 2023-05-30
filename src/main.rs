@@ -139,7 +139,7 @@ fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
         .collect::<Vec<_>>();
 
     if file_hash_results.is_empty() {
-        bail!("There were no successful hashes computed!");
+        bail!("There were no hashes computed.");
     } else if file_hash_results.len() == 1 {
         Ok(file_hash_results.pop().unwrap().1)
     } else {
