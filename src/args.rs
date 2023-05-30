@@ -7,6 +7,9 @@ use crate::hashers::HashFunction;
 /// The arguments for the program.
 #[derive(Parser)]
 pub(crate) struct Args {
+    #[arg(help = "The path to run the dircs on. Can be a file or directory")]
+    pub path: PathBuf,
+
     #[arg(
         short = 'f',
         long,
@@ -41,13 +44,14 @@ pub(crate) struct Args {
         short,
         long,
         help = "Whether to enable memmapping for reading files. Off by default. May use a lot of memory.",
-        long_help = "Whether to enable memmapping for reading files. Off by default. Note that this use a lot of memory, especially with multiple threads, and that some files will skip this option, even if enabled. Also note that if a memmapped file is modified, there may be undefined behaviour!",
+        long_help = "Whether to enable memmapping for reading files. Off by default. Note that:
+* This use a lot of memory, especially with multiple threads
+* This does not necessarily result in speedups
+* Some files will skip this option, even if enabled'
+* If a memmapped file is modified, there may be undefined behaviour!",
         default_value = "false"
     )]
     pub memmap: bool,
-
-    #[arg(help = "The path to run the dircs on. Can be a file or directory")]
-    pub path: PathBuf,
 
     #[arg(
         short,
