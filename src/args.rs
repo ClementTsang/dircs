@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::hash_functions::HashFunction;
+use crate::hashers::HashFunction;
 
 /// The arguments for the program.
 #[derive(Parser)]

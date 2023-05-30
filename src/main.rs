@@ -1,4 +1,4 @@
-mod hash_functions;
+mod hashers;
 
 mod memmap;
 
@@ -14,7 +14,7 @@ use anyhow::bail;
 use args::*;
 
 use clap::Parser;
-use hash_functions::DircsHasher;
+use hashers::DircsHasher;
 use jwalk::WalkDir;
 use memmap::try_memmap;
 use rayon::{
