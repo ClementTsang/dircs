@@ -4,8 +4,9 @@ use clap::Parser;
 
 use crate::hashers::HashFunction;
 
-/// The arguments for the program.
+/// Arguments for dircs.
 #[derive(Parser)]
+#[command(about = "A small cross-platform utility to get a hash of a file or directory.")]
 pub(crate) struct Args {
     #[arg(help = "The path to run the dircs on. Can be a file or directory")]
     pub path: PathBuf,
