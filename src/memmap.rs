@@ -15,7 +15,7 @@ pub(crate) fn try_memmap(file: &File) -> anyhow::Result<Option<Mmap>> {
     const MIN_SIZE: u64 = 16 * 1024;
     const MAX_SIZE: u64 = isize::MAX as u64;
 
-    if !metadata.is_file() || file_size == 0 || file_size > MAX_SIZE || file_size < MIN_SIZE {
+    if !metadata.is_file() || file_size == 0 || !(MIN_SIZE..=MAX_SIZE).contains(&file_size) {
         Ok(None)
     } else {
         // SAFETY: This is marked as unsafe as memmaps are always UB if the underlying file
