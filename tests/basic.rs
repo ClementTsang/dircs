@@ -10,9 +10,9 @@ fn dircs() -> Command {
 fn get_hash(path: &str) -> String {
     let out = dircs().arg(path).output().unwrap();
     let stdout = String::from_utf8(out.stdout).unwrap();
-    let hash = stdout.rsplit_once(" ").unwrap().1;
+    let hash = stdout.rsplit_once(' ').unwrap().1;
 
-    hash.strip_suffix("\n").unwrap().to_string()
+    hash.strip_suffix('\n').unwrap().to_string()
 }
 
 #[test]
