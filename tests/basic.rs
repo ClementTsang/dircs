@@ -15,6 +15,15 @@ fn get_hash(path: &str) -> String {
     hash.strip_suffix('\n').unwrap().to_string()
 }
 
+fn print_hash_with_fn(path: &str, f: &str) {
+    let out = dircs().arg(path).arg("-f").arg(f).output().unwrap();
+    let stdout = String::from_utf8(out.stdout).unwrap();
+    let hash = stdout.rsplit_once(' ').unwrap().1;
+
+    let result = hash.strip_suffix('\n').unwrap().to_string();
+    println!("{f}: {result}");
+}
+
 #[test]
 fn dir_checksum() {
     assert_eq!(
@@ -50,4 +59,17 @@ fn different_file_different_hashes() {
 #[test]
 fn empty_dir() {
     dircs().arg("./tests/test_dir/empty_dir").assert().failure();
+}
+
+#[test]
+fn test_hashers() {
+    print_hash_with_fn("./tests/test_dir/a.txt", "blake3");
+    print_hash_with_fn("./tests/test_dir/a.txt", "md5");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha1");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-256");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-384");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-512");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-256");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-384");
+    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-512");
 }
