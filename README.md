@@ -2,7 +2,7 @@
 
 [<img src="https://img.shields.io/crates/v/dircs.svg?style=flat-square" alt="crates.io link">](https://crates.io/crates/dircs)
 
-A small cross-platform utility to get the hash of a file or directory. Comes with a variety of hash functions to choose from.
+A small cross-platform utility to get a hash of a file or directory. Comes with a variety of hash functions to choose from.
 
 **Note**: I mostly wrote this for personal use, and there might be a lot of rough edges! Feel free to submit pull
 requests or bug reports.
