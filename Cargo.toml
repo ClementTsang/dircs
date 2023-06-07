@@ -1,6 +1,6 @@
 [package]
 name = "dircs"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
 edition = "2021"
 repository = "https://github.com/ClementTsang/dircs"
@@ -10,7 +10,7 @@ categories = ["command-line-utilities"]
 description = "A small cross-platform utility to get a hash of a file or directory."
 readme = "README.md"
 rust-version = "1.69.0"
-exclude = [".markdownlint.json", "CHANGELOG.md"]
+exclude = [".github", ".markdownlint.json", "CHANGELOG.md"]
 
 [[bin]]
 name = "dircs"
