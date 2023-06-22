@@ -166,7 +166,7 @@ fn main() -> anyhow::Result<()> {
     args.sort_args();
 
     for path in &args.paths {
-        match get_path_hash(&args, &path) {
+        match get_path_hash(&args, path) {
             Ok(hash) => {
                 let hex = hex::encode(hash);
                 let path = path.to_string_lossy();
