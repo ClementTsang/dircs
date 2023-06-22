@@ -59,7 +59,7 @@ fn empty_dir() {
     let out = dircs().arg("./tests/test_dir/empty_dir").output().unwrap();
     assert!(String::from_utf8(out.stdout)
         .unwrap()
-        .contains("no no files to hash"));
+        .contains("no files to hash"));
 }
 
 #[test]
