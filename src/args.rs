@@ -9,8 +9,12 @@ use crate::hashers::HashFunction;
 #[command(about = "A small cross-platform utility to get a hash of a file or directory.")]
 #[command(version)]
 pub(crate) struct Args {
-    #[arg(help = "The path to run the dircs on. Can be a file or directory")]
-    pub path: PathBuf,
+    #[arg(
+        num_args(1..),
+        help = "The paths to run the dircs on.",
+        long_help = "The paths to run the dircs on. Can be a file or directory. Multiple paths can be specified."
+    )]
+    pub paths: Vec<PathBuf>,
 
     #[arg(
         short = 'f',
@@ -63,4 +67,10 @@ pub(crate) struct Args {
         default_value = "false"
     )]
     pub verbose: bool,
+}
+
+impl Args {
+    pub(crate) fn sort_args(&mut self) {
+        self.paths.sort();
+    }
 }
