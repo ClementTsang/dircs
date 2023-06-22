@@ -68,3 +68,9 @@ pub(crate) struct Args {
     )]
     pub verbose: bool,
 }
+
+impl Args {
+    pub(crate) fn sort_args(&mut self) {
+        self.paths.sort();
+    }
+}
