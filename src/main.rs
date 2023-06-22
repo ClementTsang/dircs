@@ -7,6 +7,7 @@ mod args;
 use std::{
     fs::File,
     io::{Cursor, Read},
+    path::Path,
     time::Instant,
 };
 
@@ -36,10 +37,8 @@ impl TargetType {
     }
 }
 
-fn get_path_hash(args: &Args) -> anyhow::Result<Vec<u8>> {
-    let mut walker = WalkDir::new(&args.path)
-        .sort(true)
-        .skip_hidden(args.skip_hidden);
+fn get_path_hash(args: &Args, path: &Path) -> anyhow::Result<Vec<u8>> {
+    let mut walker = WalkDir::new(path).sort(true).skip_hidden(args.skip_hidden);
 
     if args.verbose {
         if args.skip_hidden {
@@ -165,13 +164,15 @@ fn main() -> anyhow::Result<()> {
 
     verify_args(&args)?;
 
-    let hash = get_path_hash(&args)?;
-    let hex = hex::encode(hash);
-    let path = args.path.to_string_lossy();
+    for path in &args.paths {
+        let hash = get_path_hash(&args, &path)?;
+        let hex = hex::encode(hash);
+        let path = path.to_string_lossy();
 
-    println!("{path} -> {hex}");
-    if args.verbose {
-        println!("Took {:.3}s.", start.elapsed().as_secs_f64());
+        println!("{path} -> {hex}");
+        if args.verbose {
+            println!("Took {:.3}s.", start.elapsed().as_secs_f64());
+        }
     }
 
     Ok(())
