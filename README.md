@@ -6,7 +6,7 @@ A small cross-platform utility to get a hash of a file or directory. Comes with 
 from.
 
 **Note**: I mostly wrote this for personal use, and there might be a lot of rough edges! Feel free to submit pull
-requests or bug reports.
+requests or feature requests/bug reports.
 
 ## Installation
 
