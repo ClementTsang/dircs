@@ -39,7 +39,7 @@ Currently, the following hash functions are supported:
 - SHA2 (digest sizes of 256, 384, 512)
 - SHA3 (digest sizes of 256, 384, 512)
 
-## How does this create hashes?
+## How does this determine hashes?
 
 For a single file or a directory with just one file, `dircs` will simply hash the file using the given hashing function
 of choice, and output the bytes as a hex string.
