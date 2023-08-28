@@ -16,7 +16,7 @@ requests or feature requests/bug reports.
 cargo install dircs --locked
 ```
 
-As of writing, `dircs` is built using Rust 1.69.0.
+As of writing, `dircs` has been tested to build using Rust 1.69.0.
 
 ## Usage
 
