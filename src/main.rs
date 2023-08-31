@@ -87,7 +87,10 @@ fn get_path_hash(args: &Args, path: &Path) -> anyhow::Result<Vec<u8>> {
             if let Ok(entry) = entry {
                 let Ok(path) = entry.path().canonicalize() else {
                     if args.verbose {
-                        println!("{} no longer exists, skipping", entry.path().to_string_lossy());
+                        println!(
+                            "{} no longer exists, skipping",
+                            entry.path().to_string_lossy()
+                        );
                     }
                     return None;
                 };
