@@ -10,7 +10,7 @@ requests or feature requests/bug reports.
 
 ## Installation
 
-`dircs` is on [crates.io](https://crates.io/crates/dircs) and can be installed using `cargo` like so:
+`dircs` is on [crates.io](https://crates.io/crates/dircs) and can be installed using `cargo`:
 
 ```bash
 cargo install dircs --locked
