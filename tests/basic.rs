@@ -1,5 +1,10 @@
 use std::{env, process::Command};
 
+const HASH_LIST: [&str; 11] = [
+    "blake3", "blake2b", "blake2s", "md5", "sha1", "sha2-256", "sha2-384", "sha2-512", "sha3-256",
+    "sha3-384", "sha3-512",
+];
+
 fn dircs() -> Command {
     let exe = env!("CARGO_BIN_EXE_dircs");
     Command::new(exe)
@@ -13,12 +18,16 @@ fn get_hash(path: &str) -> String {
     hash.strip_suffix('\n').unwrap().to_string()
 }
 
-fn print_hash_with_fn(path: &str, f: &str) {
+fn hash_with_fn(path: &str, f: &str) -> String {
     let out = dircs().arg(path).arg("-f").arg(f).output().unwrap();
     let stdout = String::from_utf8(out.stdout).unwrap();
     let hash = stdout.rsplit_once(' ').unwrap().1;
 
-    let result = hash.strip_suffix('\n').unwrap().to_string();
+    hash.strip_suffix('\n').unwrap().to_string()
+}
+
+fn print_hash_with_fn(path: &str, f: &str) {
+    let result = hash_with_fn(path, f);
     println!("{f}: {result}");
 }
 
@@ -63,18 +72,36 @@ fn empty_dir() {
 }
 
 #[test]
-fn test_hashers() {
-    print_hash_with_fn("./tests/test_dir/a.txt", "blake3");
-    print_hash_with_fn("./tests/test_dir/a.txt", "blake2b");
-    print_hash_with_fn("./tests/test_dir/a.txt", "blake2s");
-    print_hash_with_fn("./tests/test_dir/a.txt", "md5");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha1");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-256");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-384");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha2-512");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-256");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-384");
-    print_hash_with_fn("./tests/test_dir/a.txt", "sha3-512");
+fn test_hashers_basic() {
+    for hash_fn in HASH_LIST {
+        print_hash_with_fn("./tests/test_dir/a.txt", hash_fn);
+    }
+}
+
+#[test]
+fn all_hashers_same_twice() {
+    for hash_fn in HASH_LIST {
+        let first_try = hash_with_fn("./tests/test_dir/a.txt", hash_fn);
+        let second_try = hash_with_fn("./tests/test_dir/a.txt", hash_fn);
+
+        assert_eq!(
+            first_try, second_try,
+            "dircs should return the same result for the same file when run multiple times"
+        );
+    }
+}
+
+#[test]
+fn all_hashers_diff_twice() {
+    for hash_fn in HASH_LIST {
+        let first_file = hash_with_fn("./tests/test_dir/a.txt", hash_fn);
+        let second_file = hash_with_fn("./tests/test_dir/b.txt", hash_fn);
+
+        assert_ne!(
+            first_file, second_file,
+            "dircs should return a different hash for different files"
+        );
+    }
 }
 
 #[test]
