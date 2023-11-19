@@ -6,7 +6,7 @@ use crate::hashers::HashFunction;
 
 /// Arguments for dircs.
 #[derive(Parser)]
-#[command(about = "A small cross-platform utility to get a hash of a file or directory.")]
+#[command(about = "A small cross-platform utility to get the hash of a file or directory.")]
 #[command(version)]
 pub(crate) struct Args {
     #[arg(

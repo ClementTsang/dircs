@@ -1,3 +1,6 @@
+//! dircs is a  small cross-platform utility to get
+//! the hash of a file or directory.
+
 mod hashers;
 
 mod memmap;
