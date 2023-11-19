@@ -7,9 +7,9 @@ repository = "https://github.com/ClementTsang/dircs"
 keywords = ["cross-platform", "cli", "hash", "checksum"]
 license = "Apache-2.0"
 categories = ["command-line-utilities"]
-description = "A small cross-platform utility to get a hash of a file or directory."
+description = "A small cross-platform utility to get the hash of a file or directory."
 readme = "README.md"
-rust-version = "1.69.0"
+rust-version = "1.70.0"
 exclude = [".github", ".markdownlint.json", "CHANGELOG.md"]
 
 [[bin]]
@@ -42,3 +42,13 @@ sha3 = "0.10.8"
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
+
+[lints.rust]
+rust_2018_idioms = "deny"
+missing_docs = "deny"
+unused_extern_crates = "deny"
+
+[lints.clippy]
+todo = "deny"
+unimplemented = "deny"
+missing_safety_doc = "deny"
