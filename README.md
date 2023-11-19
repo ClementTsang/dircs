@@ -46,7 +46,7 @@ function, and output the bytes as a hex string.
 
 For a directory with multiple files, we do the following:
 
-1. For every file, generate a hash using the chosen hashing function. This occurs in parallel if possible.
+1. For every file, get the hash using the chosen hashing function. This occurs in parallel if possible.
 2. With this generated list of hashes, sort them based on file name.
 3. Feed each hash in this order into the chosen hash function to generate one final hash, which is then output as a hex
    string.
