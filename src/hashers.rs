@@ -7,6 +7,8 @@ use crate::TargetType;
 pub(crate) enum HashFunction {
     #[default]
     Blake3,
+    Blake2b,
+    Blake2s,
     MD5,
     Sha1,
     Sha2_256,
@@ -20,6 +22,8 @@ pub(crate) enum HashFunction {
 #[derive(Clone)]
 enum InternalHasher {
     Blake3(Box<blake3::Hasher>),
+    Blake2b(Box<blake2::Blake2b512>),
+    Blake2s(Box<blake2::Blake2s256>),
     MD5(Box<md5::Context>),
     Sha1(Box<sha1::Sha1>),
     Sha2_256(Box<sha2::Sha256>),
@@ -43,6 +47,8 @@ impl InternalHasher {
                     h.update(bytes);
                 }
             }
+            InternalHasher::Blake2b(h) => h.update(bytes),
+            InternalHasher::Blake2s(h) => h.update(bytes),
             InternalHasher::MD5(ctx) => ctx.consume(bytes),
             InternalHasher::Sha1(h) => h.update(bytes),
             InternalHasher::Sha2_256(h) => h.update(bytes),
@@ -60,6 +66,8 @@ impl InternalHasher {
 
         match self {
             InternalHasher::Blake3(h) => h.finalize().as_bytes().to_vec(),
+            InternalHasher::Blake2b(h) => h.finalize_fixed().to_vec(),
+            InternalHasher::Blake2s(h) => h.finalize_fixed().to_vec(),
             InternalHasher::MD5(ctx) => ctx.compute().0.to_vec(),
             InternalHasher::Sha1(h) => h.finalize_fixed().to_vec(),
             InternalHasher::Sha2_256(h) => h.finalize_fixed().to_vec(),
@@ -83,6 +91,8 @@ impl DircsHasher {
 
         let hasher = match hash_function {
             HashFunction::Blake3 => InternalHasher::Blake3(blake3::Hasher::new().into()),
+            HashFunction::Blake2b => InternalHasher::Blake2b(blake2::Blake2b512::new().into()),
+            HashFunction::Blake2s => InternalHasher::Blake2s(blake2::Blake2s256::new().into()),
             HashFunction::MD5 => InternalHasher::MD5(md5::Context::new().into()),
             HashFunction::Sha1 => InternalHasher::Sha1(sha1::Sha1::new().into()),
             HashFunction::Sha2_256 => InternalHasher::Sha2_256(sha2::Sha256::new().into()),

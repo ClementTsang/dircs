@@ -29,6 +29,7 @@ codegen-units = 1
 
 [dependencies]
 anyhow = "1.0.75"
+blake2 = "0.10.6"
 blake3 = { version = "1.4.1", features = ["rayon"] }
 clap = { version = "4.4.2", features = ["derive"] }
 hex = "0.4.3"

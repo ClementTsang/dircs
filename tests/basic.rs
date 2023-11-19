@@ -65,6 +65,8 @@ fn empty_dir() {
 #[test]
 fn test_hashers() {
     print_hash_with_fn("./tests/test_dir/a.txt", "blake3");
+    print_hash_with_fn("./tests/test_dir/a.txt", "blake2b");
+    print_hash_with_fn("./tests/test_dir/a.txt", "blake2s");
     print_hash_with_fn("./tests/test_dir/a.txt", "md5");
     print_hash_with_fn("./tests/test_dir/a.txt", "sha1");
     print_hash_with_fn("./tests/test_dir/a.txt", "sha2-256");

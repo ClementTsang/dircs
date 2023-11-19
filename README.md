@@ -34,6 +34,7 @@ See more options by running `dircs -h`.
 Currently, the following hash functions are supported:
 
 - BLAKE3
+- BLAKE2
 - MD5
 - SHA1
 - SHA2 (digest sizes of 256, 384, 512)
