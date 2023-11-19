@@ -34,7 +34,7 @@ clap = { version = "4.4.2", features = ["derive"] }
 hex = "0.4.3"
 jwalk = "0.8.1"
 md5 = "0.7.0"
-memmap2 = "0.7.1"
+memmap2 = "0.9.0"
 rayon = "1.7.0"
 sha1 = "0.10.5"
 sha2 = "0.10.7"
