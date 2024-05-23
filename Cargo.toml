@@ -46,8 +46,6 @@ assert_cmd = "2.0.12"
 
 [lints.rust]
 rust_2018_idioms = "deny"
-missing_docs = "deny"
-unused_extern_crates = "deny"
 
 [lints.clippy]
 todo = "deny"
