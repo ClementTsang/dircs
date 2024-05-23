@@ -8,6 +8,7 @@ use crate::hashers::HashFunction;
 #[derive(Parser)]
 #[command(about = "A small cross-platform utility to get the hash of a file or directory.")]
 #[command(version)]
+#[command(arg_required_else_help = true)]
 pub(crate) struct Args {
     #[arg(
         num_args(1..),
