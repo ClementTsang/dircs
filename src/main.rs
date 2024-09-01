@@ -182,7 +182,12 @@ fn main() -> anyhow::Result<()> {
             Err(err) => {
                 let path = path.to_string_lossy();
 
-                println!("{path} -> {err:?}");
+                if args.verbose {
+                    println!("{path} -> {err}");
+                    println!("backtrace: \n{err:?}");
+                } else {
+                    println!("{path} -> {err}");
+                }
             }
         }
 

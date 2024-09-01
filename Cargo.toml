@@ -28,21 +28,21 @@ opt-level = 3
 codegen-units = 1
 
 [dependencies]
-anyhow = "1.0.75"
+anyhow = "1.0.86"
 blake2 = "0.10.6"
-blake3 = { version = "1.5.0", features = ["rayon"] }
-clap = { version = "4.4.8", features = ["derive"] }
+blake3 = { version = "1.5.4", features = ["rayon"] }
+clap = { version = "4.5.16", features = ["derive"] }
 hex = "0.4.3"
 jwalk = "0.8.1"
 md5 = "0.7.0"
-memmap2 = "0.9.0"
-rayon = "1.8.0"
+memmap2 = "0.9.4"
+rayon = "1.10.0"
 sha1 = "0.10.6"
 sha2 = "0.10.8"
 sha3 = "0.10.8"
 
 [dev-dependencies]
-assert_cmd = "2.0.12"
+assert_cmd = "2.0.16"
 
 [lints.rust]
 rust_2018_idioms = "deny"
