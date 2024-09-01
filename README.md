@@ -20,6 +20,9 @@ cargo install dircs --locked
 
 As of writing, `dircs` has been tested to build using Rust 1.70.0.
 
+If you want to disable certain hash functions for whatever reason, you can control this by disabling the appropriate
+feature for that hash function (see `Cargo.toml`).
+
 ### Binaries
 
 As of 0.1.9, binaries are generated on release through CI. These can be accessed in the
@@ -43,7 +46,7 @@ See more options by running `dircs -h`.
 
 Currently, the following hash functions are supported:
 
-- BLAKE3
+- BLAKE3 (default)
 - BLAKE2
 - MD5
 - SHA1
