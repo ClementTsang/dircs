@@ -57,6 +57,7 @@ enum InternalHasher {
 impl InternalHasher {
     /// Update the internal state of the hasher given some bytes.
     fn update(&mut self, bytes: &[u8], use_rayon: bool) {
+        #[cfg(feature = "sha1")]
         use sha1::digest::Update;
 
         match self {
@@ -92,6 +93,7 @@ impl InternalHasher {
 
     /// Finalize the hash computation and return a hash.
     fn finalize(self) -> Vec<u8> {
+        #[cfg(feature = "sha1")]
         use sha1::digest::FixedOutput;
 
         match self {
@@ -127,6 +129,7 @@ pub(crate) struct DircsHasher {
 
 impl DircsHasher {
     pub(crate) fn new(hash_function: HashFunction) -> Self {
+        #[cfg(feature = "sha1")]
         use sha1::digest::Digest;
 
         let hasher = match hash_function {
