@@ -1,0 +1,278 @@
+name: "build"
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Which tag to deploy as:"
+        required: true
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_HUSKY_DONT_INSTALL_HOOKS: true
+
+jobs:
+  initialize:
+    name: initialize
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ env.VERSION }}
+    steps:
+      - name: Get the release version from the tag
+        if: env.VERSION == ''
+        run: |
+          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
+              echo "Manual run against a tag; overriding actual tag in the environment..."
+              echo "VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+              echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
+
+      - name: Validate version environment variable
+        run: |
+          echo "Version being built against is version ${{ env.VERSION }}"!
+
+  build-release:
+    needs: [initialize]
+    name: "Build binaries"
+    runs-on: ${{ matrix.info.os }}
+    container: ${{ matrix.info.container }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        info:
+          # ======= Supported targets =======
+          # Linux (x86-64, x86, aarch64)
+          - {
+              os: "ubuntu-20.04",
+              target: "x86_64-unknown-linux-gnu",
+              cross: false,
+              generate-other-artifacts: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "i686-unknown-linux-gnu",
+              cross: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "x86_64-unknown-linux-musl",
+              cross: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "i686-unknown-linux-musl",
+              cross: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "aarch64-unknown-linux-gnu",
+              cross: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "aarch64-unknown-linux-musl",
+              cross: true,
+            }
+
+          # macOS (x86-64 and aarch64)
+          - { os: "macos-12", target: "x86_64-apple-darwin", cross: false }
+          - { os: "macos-14", target: "aarch64-apple-darwin", cross: false }
+
+          # Windows (x86-64, x86)
+          - {
+              os: "windows-2019",
+              target: "x86_64-pc-windows-msvc",
+              cross: false,
+            }
+          - { os: "windows-2019", target: "i686-pc-windows-msvc", cross: false }
+          - {
+              os: "windows-2019",
+              target: "x86_64-pc-windows-gnu",
+              cross: false,
+            }
+
+          # ======= Unsupported targets =======
+          # armv7
+          - {
+              os: "ubuntu-20.04",
+              target: "armv7-unknown-linux-gnueabihf",
+              cross: true,
+            }
+          - {
+              os: "ubuntu-20.04",
+              target: "armv7-unknown-linux-musleabihf",
+              cross: true,
+            }
+
+          # PowerPC 64 LE
+          - {
+              os: "ubuntu-20.04",
+              target: "powerpc64le-unknown-linux-gnu",
+              cross: true,
+            }
+
+          # Risc-V 64gc
+          - {
+              os: "ubuntu-20.04",
+              target: "riscv64gc-unknown-linux-gnu",
+              cross: true,
+            }
+    steps:
+      - name: Checkout repository
+        if: matrix.info.container == ''
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 1
+
+      - name: Checkout repository (non-GitHub container)
+        if: matrix.info.container != ''
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          fetch-depth: 1
+
+      - name: Set up Rust toolchain
+        if: matrix.info.container == ''
+        uses: dtolnay/rust-toolchain@21dc36fb71dd22e3317045c0c31a3f4249868b17
+        with:
+          toolchain: ${{ matrix.info.rust || 'stable' }}
+          target: ${{ matrix.info.target }}
+
+      - name: Set up Rust toolchain (non-GitHub container)
+        if: matrix.info.container != ''
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs --output rustup.sh
+          sh rustup.sh --default-toolchain stable -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Build
+        uses: ClementTsang/cargo-action@v0.0.5
+        env:
+          BTM_GENERATE: true
+          BTM_BUILD_RELEASE_CALLER: ${{ inputs.caller }}
+        with:
+          command: build
+          args: --release --verbose --locked --target=${{ matrix.info.target }} --features deploy
+          use-cross: ${{ matrix.info.cross }}
+          cross-version: 0.2.5
+
+      - name: Move automatically generated completion/manpage
+        shell: bash
+        run: |
+          mv "$COMPLETION_DIR" completion
+          mv "$MANPAGE_DIR" manpage
+
+      - name: Bundle release and completion (Windows)
+        if: matrix.info.os == 'windows-2019'
+        shell: bash
+        run: |
+          cp target/${{ matrix.info.target }}/release/btm.exe btm.exe
+          7z a bottom_${{ matrix.info.target }}.zip "btm.exe"
+          7z a bottom_${{ matrix.info.target }}.zip "completion"
+          echo "ASSET=bottom_${{ matrix.info.target }}.zip" >> $GITHUB_ENV
+
+      - name: Bundle release and completion (Linux and macOS)
+        if: matrix.info.os != 'windows-2019'
+        shell: bash
+        run: |
+          cp target/${{ matrix.info.target }}/release/btm ./btm
+          tar -czvf bottom_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz btm completion
+          echo "ASSET=bottom_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz" >> $GITHUB_ENV
+
+      - name: Generate artifact attestation for file
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ env.ASSET }}
+
+      - name: Create release directory for artifact, move file
+        shell: bash
+        run: |
+          mkdir release
+          mv ${{ env.ASSET }} release/
+
+      - name: Compress completion files
+        if: matrix.info.generate-other-artifacts == true
+        shell: bash
+        run: |
+          tar -C ./completion -czvf completion.tar.gz .
+          mv completion.tar.gz release/
+
+      - name: Compress manpage files
+        if: matrix.info.generate-other-artifacts == true
+        shell: bash
+        run: |
+          gzip ./manpage/btm.1
+          tar -C ./manpage -czvf manpage.tar.gz .
+          mv manpage.tar.gz release/
+
+      - name: Copy over .desktop file
+        if: matrix.info.generate-other-artifacts == true
+        shell: bash
+        run: |
+          cp ./desktop/bottom.desktop release/
+
+      - name: Save release as artifact
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        with:
+          retention-days: 3
+          name: "release-${{ matrix.info.target }}${{ matrix.info.suffix }}"
+          path: release
+
+  upload-release:
+    name: upload-release
+    runs-on: ubuntu-latest
+    needs: [initialize, build-release]
+    steps:
+      - name: Set release version
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=${{ needs.initialize.outputs.version }}" >> $GITHUB_ENV
+
+      - name: Validate release version
+        run: |
+          echo "Release version: ${{ env.RELEASE_VERSION }}"
+
+      - name: Get release artifacts
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+
+      - name: Print out all release files
+        run: |
+          echo "Generated $(ls ./release | wc -l) files:"
+          du -h -d 0 ./release/*
+
+      - name: Create release and add release files
+        uses: softprops/action-gh-release@20e085ccc73308c2c8e43ab8da4f8d7ecbb94d4e # 2.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          tag_name: ${{ env.RELEASE_VERSION }}
+          draft: true
+          fail_on_unmatched_files: true
+          name: ${{ env.RELEASE_VERSION }} Release
+          body: |
+            <!-- Write summary here -->
+
+            ---
+
+            ## Bug Fixes
+                
+            ## Features
+                
+            ## Changes
+
+            ## Other
+
+            ## Internal Changes
+          files: |
+            ./release/*
