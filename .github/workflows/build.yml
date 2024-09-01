@@ -15,6 +15,15 @@ env:
   CARGO_INCREMENTAL: 0
   CARGO_PROFILE_DEV_DEBUG: 0
   CARGO_HUSKY_DONT_INSTALL_HOOKS: true
+  BINARY_NAME: "dircs"
+  PROGRAM_NAME: "dircs"
+
+permissions:
+  # Used for creating releases
+  contents: write
+  # Used for attestations
+  id-token: write
+  attestations: write
 
 jobs:
   initialize:
@@ -154,37 +163,27 @@ jobs:
 
       - name: Build
         uses: ClementTsang/cargo-action@v0.0.5
-        env:
-          BTM_GENERATE: true
-          BTM_BUILD_RELEASE_CALLER: ${{ inputs.caller }}
         with:
           command: build
           args: --release --verbose --locked --target=${{ matrix.info.target }}
           use-cross: ${{ matrix.info.cross }}
           cross-version: 0.2.5
 
-      - name: Move automatically generated completion/manpage
-        shell: bash
-        run: |
-          mv "$COMPLETION_DIR" completion
-          mv "$MANPAGE_DIR" manpage
-
       - name: Bundle release and completion (Windows)
         if: matrix.info.os == 'windows-2019'
         shell: bash
         run: |
-          cp target/${{ matrix.info.target }}/release/btm.exe btm.exe
-          7z a bottom_${{ matrix.info.target }}.zip "btm.exe"
-          7z a bottom_${{ matrix.info.target }}.zip "completion"
-          echo "ASSET=bottom_${{ matrix.info.target }}.zip" >> $GITHUB_ENV
+          cp target/${{ matrix.info.target }}/release/${BINARY_NAME}.exe ${BINARY_NAME}.exe
+          7z a ${PROGRAM_NAME}_${{ matrix.info.target }}.zip "${BINARY_NAME}.exe"
+          echo "ASSET=${PROGRAM_NAME}_${{ matrix.info.target }}.zip" >> $GITHUB_ENV
 
       - name: Bundle release and completion (Linux and macOS)
         if: matrix.info.os != 'windows-2019'
         shell: bash
         run: |
-          cp target/${{ matrix.info.target }}/release/btm ./btm
-          tar -czvf bottom_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz btm completion
-          echo "ASSET=bottom_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz" >> $GITHUB_ENV
+          cp target/${{ matrix.info.target }}/release/${BINARY_NAME} ./${BINARY_NAME}
+          tar -czvf ${PROGRAM_NAME}_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz ${BINARY_NAME}
+          echo "ASSET=${PROGRAM_NAME}_${{ matrix.info.target }}${{ matrix.info.suffix }}.tar.gz" >> $GITHUB_ENV
 
       - name: Generate artifact attestation for file
         uses: actions/attest-build-provenance@v1
@@ -196,27 +195,6 @@ jobs:
         run: |
           mkdir release
           mv ${{ env.ASSET }} release/
-
-      - name: Compress completion files
-        if: matrix.info.generate-other-artifacts == true
-        shell: bash
-        run: |
-          tar -C ./completion -czvf completion.tar.gz .
-          mv completion.tar.gz release/
-
-      - name: Compress manpage files
-        if: matrix.info.generate-other-artifacts == true
-        shell: bash
-        run: |
-          gzip ./manpage/btm.1
-          tar -C ./manpage -czvf manpage.tar.gz .
-          mv manpage.tar.gz release/
-
-      - name: Copy over .desktop file
-        if: matrix.info.generate-other-artifacts == true
-        shell: bash
-        run: |
-          cp ./desktop/bottom.desktop release/
 
       - name: Save release as artifact
         uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
@@ -252,9 +230,8 @@ jobs:
           du -h -d 0 ./release/*
 
       - name: Create release and add release files
-        uses: softprops/action-gh-release@20e085ccc73308c2c8e43ab8da4f8d7ecbb94d4e # 2.0.1
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # 2.0.8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           tag_name: ${{ env.RELEASE_VERSION }}
           draft: true
