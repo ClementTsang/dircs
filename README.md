@@ -10,13 +10,23 @@ pull requests, feature requests, or bug reports.
 
 ## Installation
 
+### Cargo
+
 `dircs` is on [crates.io](https://crates.io/crates/dircs) and can be installed with `cargo`:
 
 ```bash
 cargo install dircs --locked
 ```
 
-As of writing, `dircs` has been tested to build using Rust 1.69.0.
+As of writing, `dircs` has been tested to build using Rust 1.70.0.
+
+### Binaries
+
+As of 0.1.9, binaries are generated on release through CI. These can be accessed in the
+[releases](https://github.com/ClementTsang/dircs/releases), with the latest releases found
+[here](https://github.com/ClementTsang/dircs/releases/latest).
+
+To use them, download the appropriate binary for your system and run the binary as needed.
 
 ## Usage
 
