@@ -116,13 +116,11 @@ fn multiple_inputs() {
         .output()
         .unwrap();
 
-    let result = String::from_utf8(out.stdout).unwrap();
-
     let correct = "\
 ./tests/test_dir/a.txt -> 81c4b7f7e0549f1514e9cae97cf40cf133920418d3dc71bedbf60ec9bd6148cb
 ./tests/test_dir/b.txt -> 9d902f9864f3043dca97e40698eee07a2fe6771591c687ed129cde8f6fcc4a79
 ./tests/test_dir/empty_dir -> there were no files to hash
 ./tests/test_dir/sub_dir -> d364677c85f04e475fc6a041d8cb4c54c4dcc3d93161d162d8db8c89f7598749\n";
 
-    assert_eq!(result, correct);
+    assert_eq!(String::from_utf8(out.stdout).unwrap(), correct);
 }

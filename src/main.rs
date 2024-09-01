@@ -182,7 +182,7 @@ fn main() -> anyhow::Result<()> {
             Err(err) => {
                 let path = path.to_string_lossy();
 
-                println!("{path} -> {err:?}");
+                println!("{path} -> {err}");
             }
         }
 
