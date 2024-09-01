@@ -7,30 +7,50 @@ use crate::TargetType;
 pub(crate) enum HashFunction {
     #[default]
     Blake3,
+    #[cfg(feature = "blake2")]
     Blake2b,
+    #[cfg(feature = "blake2")]
     Blake2s,
+    #[cfg(feature = "md5")]
     MD5,
+    #[cfg(feature = "sha1")]
     Sha1,
+    #[cfg(feature = "sha2")]
     Sha2_256,
+    #[cfg(feature = "sha2")]
     Sha2_384,
+    #[cfg(feature = "sha2")]
     Sha2_512,
+    #[cfg(feature = "sha3")]
     Sha3_256,
+    #[cfg(feature = "sha3")]
     Sha3_384,
+    #[cfg(feature = "sha3")]
     Sha3_512,
 }
 
 #[derive(Clone)]
 enum InternalHasher {
     Blake3(Box<blake3::Hasher>),
+    #[cfg(feature = "blake2")]
     Blake2b(Box<blake2::Blake2b512>),
+    #[cfg(feature = "blake2")]
     Blake2s(Box<blake2::Blake2s256>),
+    #[cfg(feature = "md5")]
     MD5(Box<md5::Context>),
+    #[cfg(feature = "sha1")]
     Sha1(Box<sha1::Sha1>),
+    #[cfg(feature = "sha2")]
     Sha2_256(Box<sha2::Sha256>),
+    #[cfg(feature = "sha2")]
     Sha2_384(Box<sha2::Sha384>),
+    #[cfg(feature = "sha2")]
     Sha2_512(Box<sha2::Sha512>),
+    #[cfg(feature = "sha3")]
     Sha3_256(Box<sha3::Sha3_256>),
+    #[cfg(feature = "sha3")]
     Sha3_384(Box<sha3::Sha3_384>),
+    #[cfg(feature = "sha3")]
     Sha3_512(Box<sha3::Sha3_512>),
 }
 
@@ -47,15 +67,25 @@ impl InternalHasher {
                     h.update(bytes);
                 }
             }
+            #[cfg(feature = "blake2")]
             InternalHasher::Blake2b(h) => h.update(bytes),
+            #[cfg(feature = "blake2")]
             InternalHasher::Blake2s(h) => h.update(bytes),
+            #[cfg(feature = "md5")]
             InternalHasher::MD5(ctx) => ctx.consume(bytes),
+            #[cfg(feature = "sha1")]
             InternalHasher::Sha1(h) => h.update(bytes),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_256(h) => h.update(bytes),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_384(h) => h.update(bytes),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_512(h) => h.update(bytes),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_256(h) => h.update(bytes),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_384(h) => h.update(bytes),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_512(h) => h.update(bytes),
         }
     }
@@ -66,15 +96,25 @@ impl InternalHasher {
 
         match self {
             InternalHasher::Blake3(h) => h.finalize().as_bytes().to_vec(),
+            #[cfg(feature = "blake2")]
             InternalHasher::Blake2b(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "blake2")]
             InternalHasher::Blake2s(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "md5")]
             InternalHasher::MD5(ctx) => ctx.compute().0.to_vec(),
+            #[cfg(feature = "sha1")]
             InternalHasher::Sha1(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_256(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_384(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha2")]
             InternalHasher::Sha2_512(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_256(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_384(h) => h.finalize_fixed().to_vec(),
+            #[cfg(feature = "sha3")]
             InternalHasher::Sha3_512(h) => h.finalize_fixed().to_vec(),
         }
     }
@@ -91,15 +131,25 @@ impl DircsHasher {
 
         let hasher = match hash_function {
             HashFunction::Blake3 => InternalHasher::Blake3(blake3::Hasher::new().into()),
+            #[cfg(feature = "blake2")]
             HashFunction::Blake2b => InternalHasher::Blake2b(blake2::Blake2b512::new().into()),
+            #[cfg(feature = "blake2")]
             HashFunction::Blake2s => InternalHasher::Blake2s(blake2::Blake2s256::new().into()),
+            #[cfg(feature = "md5")]
             HashFunction::MD5 => InternalHasher::MD5(md5::Context::new().into()),
+            #[cfg(feature = "sha1")]
             HashFunction::Sha1 => InternalHasher::Sha1(sha1::Sha1::new().into()),
+            #[cfg(feature = "sha2")]
             HashFunction::Sha2_256 => InternalHasher::Sha2_256(sha2::Sha256::new().into()),
+            #[cfg(feature = "sha2")]
             HashFunction::Sha2_384 => InternalHasher::Sha2_384(sha2::Sha384::new().into()),
+            #[cfg(feature = "sha2")]
             HashFunction::Sha2_512 => InternalHasher::Sha2_512(sha2::Sha512::new().into()),
+            #[cfg(feature = "sha3")]
             HashFunction::Sha3_256 => InternalHasher::Sha3_256(sha3::Sha3_256::new().into()),
+            #[cfg(feature = "sha3")]
             HashFunction::Sha3_384 => InternalHasher::Sha3_384(sha3::Sha3_384::new().into()),
+            #[cfg(feature = "sha3")]
             HashFunction::Sha3_512 => InternalHasher::Sha3_512(sha3::Sha3_512::new().into()),
         };
 
