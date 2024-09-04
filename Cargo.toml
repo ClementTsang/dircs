@@ -39,7 +39,7 @@ default = ["blake2", "md5", "sha1", "sha2", "sha3"]
 [dependencies]
 anyhow = "1.0.86"
 blake2 = { version = "0.10.6", optional = true }
-blake3 = { version = "1.5.4", features = ["rayon"] }
+blake3 = { version = "1.5.4", features = ["rayon"] } # we don't pull mmap as we handle that manually
 clap = { version = "4.5.16", features = ["derive"] }
 hex = "0.4.3"
 jwalk = "0.8.1"
