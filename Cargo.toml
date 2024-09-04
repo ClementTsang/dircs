@@ -1,6 +1,6 @@
 [package]
 name = "dircs"
-version = "0.1.9"
+version = "0.1.10"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
 edition = "2021"
 repository = "https://github.com/ClementTsang/dircs"
@@ -10,7 +10,7 @@ categories = ["command-line-utilities"]
 description = "A small cross-platform utility to get the hash of a file or directory."
 readme = "README.md"
 rust-version = "1.70.0"
-exclude = [".github", ".markdownlint.json", "CHANGELOG.md"]
+exclude = [".github", ".vscode", "target", ".markdownlint.json", "CHANGELOG.md"]
 
 [[bin]]
 name = "dircs"
@@ -18,7 +18,8 @@ path = "src/main.rs"
 doc = false
 
 [profile.dev.package."*"]
-opt-level = 3 # Compile dependencies with optimizations on even in debug mode.
+# Compile dependencies with optimizations on even in debug mode.
+opt-level = 3
 
 [profile.release]
 debug = 0
@@ -54,7 +55,11 @@ sha3 = { version = "0.10.8", optional = true }
 assert_cmd = "2.0.16"
 
 [lints.rust]
-rust_2018_idioms = "deny"
+missing_docs = "deny"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+missing_crate_level_docs = "deny"
 
 [lints.clippy]
 todo = "deny"
