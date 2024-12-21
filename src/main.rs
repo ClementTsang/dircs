@@ -1,11 +1,12 @@
 //! dircs is a  small cross-platform utility to get
 //! the hash of a file or directory.
 
+mod args;
 mod hashers;
-
 mod memmap;
 
-mod args;
+#[cfg(feature = "progress")]
+mod progress;
 
 use std::{
     fs::File,
@@ -14,9 +15,12 @@ use std::{
     time::Instant,
 };
 
-use anyhow::bail;
 use args::*;
 
+#[cfg(feature = "progress")]
+use progress::ProgressBarState;
+
+use anyhow::bail;
 use clap::Parser;
 use hashers::DircsHasher;
 use jwalk::WalkDir;
@@ -82,6 +86,9 @@ fn get_path_hash(args: &Args, path: &Path) -> anyhow::Result<Vec<u8>> {
 
     let hasher = DircsHasher::new(args.hash);
 
+    #[cfg(feature = "progress")]
+    let progress_bar_state = (args.progress && !args.verbose).then(ProgressBarState::default);
+
     let mut file_hash_results = walker
         .into_iter()
         .enumerate()
@@ -118,7 +125,27 @@ fn get_path_hash(args: &Args, path: &Path) -> anyhow::Result<Vec<u8>> {
                     TargetType::File(file)
                 };
 
-                match hasher.clone().hash_target(target) {
+                #[cfg(feature = "progress")]
+                if let Some(progress_bar_state) = &progress_bar_state {
+                    progress_bar_state.update_length();
+
+                    if let Some(index) = rayon::current_thread_index() {
+                        progress_bar_state.set_thread_progress(index, &path)
+                    }
+                }
+
+                let hash_result = hasher.clone().hash_target(target);
+
+                #[cfg(feature = "progress")]
+                if let Some(progress_bar_state) = &progress_bar_state {
+                    if let Some(index) = rayon::current_thread_index() {
+                        progress_bar_state.finish_thread_progress(index)
+                    }
+
+                    progress_bar_state.update_progress();
+                }
+
+                match hash_result {
                     Ok((result, bytes_read)) => {
                         if args.verbose {
                             let hex = hex::encode(&result);
@@ -142,6 +169,11 @@ fn get_path_hash(args: &Args, path: &Path) -> anyhow::Result<Vec<u8>> {
             }
         })
         .collect::<Vec<_>>();
+
+    #[cfg(feature = "progress")]
+    if let Some(progress_bar_state) = progress_bar_state {
+        progress_bar_state.finish();
+    }
 
     if file_hash_results.is_empty() {
         bail!("there were no files to hash");
