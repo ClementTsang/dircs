@@ -44,7 +44,7 @@ pub(crate) struct Args {
         short,
         long,
         help = "Whether to skip hidden files. Does not skip by default.",
-        default_value = "false"
+        default_value_t = false
     )]
     pub skip_hidden: bool,
 
@@ -57,15 +57,24 @@ pub(crate) struct Args {
 * This does not necessarily result in speedups.
 * Some files will not be memmapped if the file is too small or too large.
 * If a memmapped file is modified, there may be undefined behaviour!",
-        default_value = "false"
+        default_value_t = false
     )]
     pub memmap: bool,
+
+    #[cfg(feature = "progress")]
+    #[arg(
+        short = 'p',
+        long,
+        help = "Enable a progress bar. Will not show if verbose is enabled.",
+        default_value_t = false
+    )]
+    pub progress: bool,
 
     #[arg(
         short,
         long,
         help = "Whether to show verbose logging. Disabled by default.",
-        default_value = "false"
+        default_value_t = false
     )]
     pub verbose: bool,
 }
