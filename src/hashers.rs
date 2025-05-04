@@ -56,13 +56,15 @@ enum InternalHasher {
 
 impl InternalHasher {
     /// Update the internal state of the hasher given some bytes.
-    fn update(&mut self, bytes: &[u8], use_rayon: bool) {
+    fn update(&mut self, bytes: &[u8]) {
         #[cfg(feature = "sha1")]
         use sha1::digest::Update;
 
         match self {
             InternalHasher::Blake3(h) => {
-                if use_rayon {
+                const SKIP_RAYON_LIMIT: usize = 128 * 1000;
+
+                if bytes.len() >= SKIP_RAYON_LIMIT {
                     h.update_rayon(bytes);
                 } else {
                     h.update(bytes);
@@ -161,7 +163,7 @@ impl DircsHasher {
 
     pub(crate) fn hash_result(mut self, bytes_vec: &[(usize, Vec<u8>)]) -> Vec<u8> {
         for (_, bytes) in bytes_vec {
-            self.state.update(bytes, false);
+            self.state.update(bytes);
         }
         self.state.finalize()
     }
@@ -190,7 +192,7 @@ impl DircsHasher {
                         }
                         Ok(bytes_read) => {
                             total_bytes += bytes_read;
-                            self.state.update(&buffer[..bytes_read], false);
+                            self.state.update(&buffer[..bytes_read]);
                         }
                         Err(err) => {
                             if err.kind() == std::io::ErrorKind::Interrupted {
