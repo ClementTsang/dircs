@@ -62,7 +62,8 @@ impl InternalHasher {
 
         match self {
             InternalHasher::Blake3(h) => {
-                const SKIP_RAYON_LIMIT: usize = 128 * 1000;
+                // Limit is 128 KiB.
+                const SKIP_RAYON_LIMIT: usize = 128 * 1024;
 
                 if bytes.len() >= SKIP_RAYON_LIMIT {
                     h.update_rayon(bytes);
