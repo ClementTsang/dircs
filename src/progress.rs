@@ -4,7 +4,7 @@ use std::{
     time::Duration,
 };
 
-use console::{truncate_str, Term};
+use console::{Term, truncate_str};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
 
 pub(crate) struct ProgressBarState {

@@ -68,9 +68,11 @@ fn different_file_different_hashes() {
 #[test]
 fn empty_dir() {
     let out = dircs().arg("./tests/test_dir/empty_dir").output().unwrap();
-    assert!(String::from_utf8(out.stdout)
-        .unwrap()
-        .contains("no files to hash"));
+    assert!(
+        String::from_utf8(out.stdout)
+            .unwrap()
+            .contains("no files to hash")
+    );
 }
 
 #[test]

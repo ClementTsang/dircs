@@ -2,14 +2,14 @@
 name = "dircs"
 version = "0.2.0"
 authors = ["Clement Tsang <cjhtsang@uwaterloo.ca>"]
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/ClementTsang/dircs"
 keywords = ["cross-platform", "cli", "hash", "checksum"]
 license = "Apache-2.0"
 categories = ["command-line-utilities"]
 description = "A small cross-platform utility to get the hash of a file or directory."
 readme = "README.md"
-rust-version = "1.70.0"
+rust-version = "1.85.0"
 exclude = [".github", ".vscode", "target", ".markdownlint.json", "CHANGELOG.md"]
 
 [[bin]]
@@ -39,23 +39,23 @@ progress = ["dep:console", "dep:indicatif"]
 default = ["blake2", "md5", "sha1", "sha2", "sha3", "progress"]
 
 [dependencies]
-anyhow = "1.0.94"
+anyhow = "1.0.98"
 blake2 = { version = "0.10.6", optional = true }
-blake3 = { version = "1.5.4", features = ["rayon"] } # we don't pull mmap as we handle that manually
-clap = { version = "4.5.23", features = ["derive"] }
-console = { version = "0.15.10", optional = true }
+blake3 = { version = "1.8.2", features = ["rayon"] } # we don't pull mmap as we handle that manually
+clap = { version = "4.5.37", features = ["derive"] }
+console = { version = "0.15.11", optional = true }
 hex = "0.4.3"
-indicatif = { version = "0.17.9", optional = true }
+indicatif = { version = "0.17.11", optional = true }
 jwalk = "0.8.1"
 md5 = { version = "0.7.0", optional = true }
 memmap2 = "0.9.5"
 rayon = "1.10.0"
 sha1 = { version = "0.10.6", optional = true }
-sha2 = { version = "0.10.8", optional = true }
+sha2 = { version = "0.10.9", optional = true }
 sha3 = { version = "0.10.8", optional = true }
 
 [dev-dependencies]
-assert_cmd = "2.0.16"
+assert_cmd = "2.0.17"
 
 [lints.rust]
 missing_docs = "deny"
