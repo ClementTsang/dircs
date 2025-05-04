@@ -26,8 +26,8 @@ use hashers::DircsHasher;
 use jwalk::WalkDir;
 use memmap::try_memmap;
 use rayon::{
-    prelude::{ParallelBridge, ParallelIterator},
     ThreadPoolBuilder,
+    prelude::{ParallelBridge, ParallelIterator},
 };
 
 enum TargetType {
