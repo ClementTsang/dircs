@@ -2,6 +2,9 @@ use clap::ValueEnum;
 
 use crate::TargetType;
 
+// Limit is 128 KiB.
+const SKIP_RAYON_LIMIT: usize = 128 * 1024;
+
 /// The various hash functions.
 #[derive(Default, Clone, Copy, Debug, ValueEnum)]
 pub(crate) enum HashFunction {
@@ -56,13 +59,13 @@ enum InternalHasher {
 
 impl InternalHasher {
     /// Update the internal state of the hasher given some bytes.
-    fn update(&mut self, bytes: &[u8], use_rayon: bool) {
+    fn update(&mut self, bytes: &[u8]) {
         #[cfg(feature = "sha1")]
         use sha1::digest::Update;
 
         match self {
             InternalHasher::Blake3(h) => {
-                if use_rayon {
+                if bytes.len() >= SKIP_RAYON_LIMIT {
                     h.update_rayon(bytes);
                 } else {
                     h.update(bytes);
@@ -161,7 +164,7 @@ impl DircsHasher {
 
     pub(crate) fn hash_result(mut self, bytes_vec: &[(usize, Vec<u8>)]) -> Vec<u8> {
         for (_, bytes) in bytes_vec {
-            self.state.update(bytes, false);
+            self.state.update(bytes);
         }
         self.state.finalize()
     }
@@ -175,7 +178,13 @@ impl DircsHasher {
                 // If we have memmap and blake3 enabled, we can use this nifty feature!
 
                 let total_bytes = cursor.get_ref().len();
-                hasher.update_rayon(cursor.get_ref());
+
+                if total_bytes >= SKIP_RAYON_LIMIT {
+                    hasher.update_rayon(cursor.get_ref());
+                } else {
+                    hasher.update(cursor.get_ref());
+                }
+
                 Ok((hasher.finalize().as_bytes().to_vec(), total_bytes))
             }
             _ => {
@@ -190,7 +199,7 @@ impl DircsHasher {
                         }
                         Ok(bytes_read) => {
                             total_bytes += bytes_read;
-                            self.state.update(&buffer[..bytes_read], false);
+                            self.state.update(&buffer[..bytes_read]);
                         }
                         Err(err) => {
                             if err.kind() == std::io::ErrorKind::Interrupted {
