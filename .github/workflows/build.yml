@@ -110,26 +110,26 @@ jobs:
           # ======= Unsupported targets =======
           # armv7
           - {
-              os: "ubuntu-20.04",
+              os: "ubuntu-22.04",
               target: "armv7-unknown-linux-gnueabihf",
               cross: true,
             }
           - {
-              os: "ubuntu-20.04",
+              os: "ubuntu-22.04",
               target: "armv7-unknown-linux-musleabihf",
               cross: true,
             }
 
           # PowerPC 64 LE
           - {
-              os: "ubuntu-20.04",
+              os: "ubuntu-22.04",
               target: "powerpc64le-unknown-linux-gnu",
               cross: true,
             }
 
           # Risc-V 64gc
           - {
-              os: "ubuntu-20.04",
+              os: "ubuntu-22.04",
               target: "riscv64gc-unknown-linux-gnu",
               cross: true,
             }
