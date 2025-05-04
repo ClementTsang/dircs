@@ -2,6 +2,9 @@ use clap::ValueEnum;
 
 use crate::TargetType;
 
+// Limit is 128 KiB.
+const SKIP_RAYON_LIMIT: usize = 128 * 1024;
+
 /// The various hash functions.
 #[derive(Default, Clone, Copy, Debug, ValueEnum)]
 pub(crate) enum HashFunction {
@@ -62,9 +65,6 @@ impl InternalHasher {
 
         match self {
             InternalHasher::Blake3(h) => {
-                // Limit is 128 KiB.
-                const SKIP_RAYON_LIMIT: usize = 128 * 1024;
-
                 if bytes.len() >= SKIP_RAYON_LIMIT {
                     h.update_rayon(bytes);
                 } else {
@@ -178,7 +178,13 @@ impl DircsHasher {
                 // If we have memmap and blake3 enabled, we can use this nifty feature!
 
                 let total_bytes = cursor.get_ref().len();
-                hasher.update_rayon(cursor.get_ref());
+
+                if total_bytes >= SKIP_RAYON_LIMIT {
+                    hasher.update_rayon(cursor.get_ref());
+                } else {
+                    hasher.update(cursor.get_ref());
+                }
+
                 Ok((hasher.finalize().as_bytes().to_vec(), total_bytes))
             }
             _ => {
