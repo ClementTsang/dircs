@@ -29,7 +29,7 @@ As of 0.1.9, binaries are generated on release through CI. These can be accessed
 [releases](https://github.com/ClementTsang/dircs/releases), with the latest releases found
 [here](https://github.com/ClementTsang/dircs/releases/latest).
 
-To use them, download the appropriate binary for your system and run the binary as needed.
+To use them, download the appropriate binary for your system and run the binary.
 
 ## Usage
 
