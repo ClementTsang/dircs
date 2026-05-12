@@ -3,9 +3,6 @@
 
 name: ci
 
-permissions:
-  contents: read
-
 on:
   workflow_dispatch:
   pull_request:
