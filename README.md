@@ -1,16 +1,11 @@
-<div align="center">
-  <h1>dircs</h1>
-
-  <p>
-   A small cross-platform utility to get the hash of a file or directory. Comes with a variety of hash functions to choose from.
-
-   
-   <b>Note</b>: I mostly wrote this for my own personal use, so there might be a lot of rough edges. Feel free to submit feature requests, or bug reports, though they may not be necessarily worked on.
-  </p>
+# dircs
 
 [<img src="https://img.shields.io/crates/v/dircs.svg?style=flat-square" alt="crates.io link">](https://crates.io/crates/dircs)
 
-</div>
+A small cross-platform utility to get the hash of a file or directory. Comes with a variety of hash functions to choose
+from.
+
+**Note**: I mostly wrote this for my own personal use, so there might be a lot of rough edges. Feel free to submit feature requests, or bug reports, though they may not be necessarily worked on.
 
 ## Installation
 
